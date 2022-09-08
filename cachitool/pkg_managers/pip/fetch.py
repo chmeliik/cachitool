@@ -2079,6 +2079,7 @@ def resolve_pip(path, workdir: Path, requirement_files=None, build_requirement_f
         else:
             # Version is the original URL with #cachito_hash added if it was not present
             version = dep["url_with_hash"]
+        return version
 
     dependencies = [
         {

@@ -46,7 +46,7 @@ T = TypeVar("T")
 
 
 def maybe_load_json(cli_arg: str, raw_data: str, expect_t: type[T]) -> T | None:
-    if not raw_data.startswith(("{", "[")):
+    if not raw_data.lstrip().startswith(("{", "[")):
         return None
 
     try:
@@ -89,10 +89,17 @@ def convert_args(args: argparse.Namespace) -> CLIArgs:
     }
 
 
-def fetch_pip_deps(pkg: PipPkgSpec, workdir: Path) -> None:
-    pip.resolve_pip(
+def resolve_pip(pkg: PipPkgSpec, workdir: Path) -> None:
+    info = pip.resolve_pip(
         pkg.path, workdir, pkg.requirements_files, pkg.requirements_build_files
     )
+    repo_dir = workdir / "piprepo"
+    pip.sync_repo(workdir / "deps" / "pip", repo_dir)
+    for reqfile in info["requirements"]:
+        pip.modify_req_file(reqfile, repo_dir)
+
+    import pprint
+    pprint.pprint(info)
 
 
 def main() -> None:
@@ -110,7 +117,7 @@ def main() -> None:
 
     for pkg in cli_args["packages"]:
         if isinstance(pkg, PipPkgSpec):
-            fetch_pip_deps(pkg, workdir)
+            resolve_pip(pkg, workdir)
         else:
             raise NotImplementedError(pkg.type)
 
