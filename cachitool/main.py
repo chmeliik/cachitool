@@ -11,8 +11,6 @@ from cachitool.pkg_managers import pip
 
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger(__name__)
-log.addHandler(logging.StreamHandler())
-log.setLevel(logging.DEBUG)
 
 
 def make_parser() -> argparse.ArgumentParser:
