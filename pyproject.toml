@@ -14,6 +14,7 @@ dependencies = [
     "requests",
     "setuptools",
 ]
+requires-python = ">=3.10"
 
 [project.scripts]
 cachitool = "cachitool.main:main"
@@ -21,6 +22,7 @@ cachitool = "cachitool.main:main"
 [tool.pylint.disable]
 disable=[
     "C",
+    "R",
     "W0107",
     "W0707",
     "W1203",
