@@ -9,6 +9,7 @@ dependencies = [
     "beautifulsoup4",
     "gitpython",
     "packaging",
+    "piprepo",
     "pydantic",
     "requests",
     "setuptools",

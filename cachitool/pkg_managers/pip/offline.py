@@ -1,10 +1,41 @@
+import filecmp
+import logging
 from pathlib import Path
 
+import piprepo.models
+
+from cachitool.errors import CachitoError
 from cachitool.pkg_managers.pip.fetch import PipRequirementsFile, get_raw_component_name
 
 
-def sync_repo(pip_deps_dir: Path, repo_dir: Path) -> None:
-    pass
+log = logging.getLogger(__name__)
+
+
+def sync_repo(pip_deps_dir: Path, repo_dir: Path) -> str:
+    """Move deps from pip_deps_dir to repo_dir and build a local index.
+
+    Leave symlinks to the moved files in pip_deps_dir.
+
+    :return: file:// URL to local index (absolute path)
+    """
+    repo_dir.mkdir(parents=True, exist_ok=True)
+
+    for dep_file in filter(Path.is_file, pip_deps_dir.rglob("*")):
+        repo_file = repo_dir / dep_file.name
+        if not repo_file.exists():
+            dep_file.rename(repo_file)
+            dep_file.symlink_to(repo_file.resolve())
+        elif not filecmp.cmp(dep_file, repo_file):
+            msg = (
+                f"{repo_file.name} already exists in the local index. "
+                f"{dep_file} has the same name but different content!"
+            )
+            raise CachitoError(msg)
+
+    with piprepo.models.LocalIndex(source=str(repo_dir), destination=str(repo_dir)):
+        log.info("Created local PyPI index at %s", repo_dir)
+
+    return f"file://{repo_dir.resolve() / 'simple'}/"
 
 
 def modify_req_file(req_file_path: Path, repo_dir: Path) -> None:

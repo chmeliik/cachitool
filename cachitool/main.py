@@ -92,12 +92,11 @@ def resolve_pip(pkg: PipPkgSpec, workdir: Path) -> None:
         pkg.path, workdir, pkg.requirements_files, pkg.requirements_build_files
     )
     repo_dir = workdir / "piprepo"
-    pip.sync_repo(workdir / "deps" / "pip", repo_dir)
+    index_url = pip.sync_repo(workdir / "deps" / "pip", repo_dir)
     for reqfile in info["requirements"]:
         pip.modify_req_file(reqfile, repo_dir)
 
-    import pprint
-    pprint.pprint(info)
+    print(f"PIP_INDEX_URL={index_url}")
 
 
 def main() -> None:
