@@ -2053,10 +2053,21 @@ def resolve_pip(path, workdir: Path, requirement_files=None, build_requirement_f
     # for requirement in requires + buildrequires:
     #     dep = _push_downloaded_requirement(requirement, pip_repo_name, raw_repo_name)
     #     dependencies.append(dep)
+
+    def _version(dep: dict) -> str:
+        if dep["kind"] == "pypi":
+            version = dep["version"]
+        elif dep["kind"] == "vcs":
+            # Version is "git+" followed by the URL used to to fetch from git
+            version = f"git+{dep['url']}@{dep['ref']}"
+        else:
+            # Version is the original URL with #cachito_hash added if it was not present
+            version = dep["url_with_hash"]
+
     dependencies = [
         {
             "name": dep["package"],
-            "version": dep["version"],
+            "version": _version(dep),
             "type": "pip",
             "dev": dep.get("dev", False),
         }
