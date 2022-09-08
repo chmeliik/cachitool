@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "cachitool"
 version = "0.0.1"
 dependencies = [
-    "defusedxml",
+    "beautifulsoup4",
     "gitpython",
     "packaging",
     "pydantic",
