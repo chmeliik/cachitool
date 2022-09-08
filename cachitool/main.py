@@ -2,7 +2,6 @@
 import argparse
 import json
 import logging
-import shlex
 from pathlib import Path
 from typing import TypedDict, TypeVar
 
@@ -96,11 +95,10 @@ def process_output(output: Output, workdir: Path) -> None:
             log.info("modifying %s", path)
             path.write_text(config_file.content)
 
-    env_file_content = "\n".join(
-        f"{shlex.quote(env_var.name)}={shlex.quote(env_var.value)}"
-        for env_var in output.env_vars
-    )
-    (workdir / "cachito.env").write_text(env_file_content)
+    env_file = workdir / "env.json"
+    log.info("writing environment variables to %s", env_file)
+    with env_file.open("w") as f:
+        json.dump([env_var.dict() for env_var in output.env_vars], f)
 
 
 def main() -> None:
