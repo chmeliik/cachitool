@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cachitool"
+version = "0.0.1"
+dependencies = [
+    "defusedxml",
+    "gitpython",
+    "packaging",
+    "pydantic",
+    "requests",
+    "setuptools",
+]
+
+[project.scripts]
+cachitool = "cachitool.main:main"
+
+[tool.pylint.disable]
+disable=[
+    "C",
+    "W0107",
+    "W0707",
+    "W1203",
+]
