@@ -1551,16 +1551,21 @@ def _download_pypi_package(requirement, pip_deps_dir, pypi_url, pypi_auth=None):
     package_dir.mkdir(exist_ok=True)
     download_path = package_dir / sdist["filename"]
 
-    if _is_relative_url(sdist_url := sdist["url"]):
-        sdist_url = f"{package_url.rstrip('/')}/{sdist_url}"
-
-    general.download_binary_file(sdist_url, download_path, auth=pypi_auth)
-
-    return {
+    info =  {
         "package": sdist["name"],
         "version": sdist["version"],
         "path": download_path,
     }
+
+    if download_path.exists():
+        log.info(f"{download_path.name} already downloaded")
+        return info
+
+    if _is_relative_url(sdist_url := sdist["url"]):
+        sdist_url = f"{package_url.rstrip('/')}/{sdist_url}"
+
+    general.download_binary_file(sdist_url, download_path, auth=pypi_auth)
+    return info
 
 
 def _process_package_links(links, name, version):
@@ -1665,6 +1670,18 @@ def _download_vcs_package(requirement, pip_deps_dir):
     filename = raw_component_name.rsplit("/", 1)[-1]
     download_path = package_dir / filename
 
+    info = {
+        "package": requirement.package,
+        "path": download_path,
+        **git_info,
+        "raw_component_name": raw_component_name,
+        # "have_raw_component": have_raw_component,
+    }
+
+    if download_path.exists():
+        log.info(f"{download_path.name} already downloaded")
+        return info
+
     # Download raw component if we already have it
     # have_raw_component = download_raw_component(
     #     raw_component_name, pip_raw_repo_name, download_path, nexus_auth
@@ -1676,14 +1693,7 @@ def _download_vcs_package(requirement, pip_deps_dir):
     repo.fetch_source(download_path, gitsubmodule=False)
     # Copy downloaded archive to expected download path
     # shutil.copy(repo.sources_dir.archive_path, download_path)
-
-    return {
-        "package": requirement.package,
-        "path": download_path,
-        **git_info,
-        "raw_component_name": raw_component_name,
-        # "have_raw_component": have_raw_component,
-    }
+    return info
 
 
 def _download_url_package(requirement, pip_deps_dir, trusted_hosts):
@@ -1716,6 +1726,19 @@ def _download_url_package(requirement, pip_deps_dir, trusted_hosts):
     package_dir.mkdir(exist_ok=True)
     download_path = package_dir / filename
 
+    info = {
+        "package": package,
+        "path": download_path,
+        "original_url": requirement.url,
+        "url_with_hash": url_with_hash,
+        "raw_component_name": raw_component_name,
+        # "have_raw_component": have_raw_component,
+    }
+
+    if download_path.exists():
+        log.info(f"{download_path.name} already downloaded")
+        return info
+
     # Download raw component if we already have it
     # have_raw_component = download_raw_component(
     #     raw_component_name, pip_raw_repo_name, download_path, nexus_auth
@@ -1742,14 +1765,7 @@ def _download_url_package(requirement, pip_deps_dir, trusted_hosts):
     else:
         url_with_hash = _add_cachito_hash_to_url(url, hash_spec)
 
-    return {
-        "package": package,
-        "path": download_path,
-        "original_url": requirement.url,
-        "url_with_hash": url_with_hash,
-        "raw_component_name": raw_component_name,
-        # "have_raw_component": have_raw_component,
-    }
+    return info
 
 
 def _add_cachito_hash_to_url(parsed_url, hash_spec):
