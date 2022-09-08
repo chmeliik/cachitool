@@ -2,10 +2,12 @@
 import argparse
 import json
 import logging
+import shlex
 from pathlib import Path
 from typing import TypedDict, TypeVar
 
 from cachitool.models.input import PkgSpec, PipPkgSpec, make_package_spec
+from cachitool.models.output import Output
 from cachitool.pkg_managers import pip
 
 
@@ -87,16 +89,18 @@ def convert_args(args: argparse.Namespace) -> CLIArgs:
     }
 
 
-def resolve_pip(pkg: PipPkgSpec, workdir: Path) -> None:
-    info = pip.resolve_pip(
-        pkg.path, workdir, pkg.requirements_files, pkg.requirements_build_files
-    )
-    repo_dir = workdir / "piprepo"
-    index_url = pip.sync_repo(workdir / "deps" / "pip", repo_dir)
-    for reqfile in info["requirements"]:
-        pip.modify_req_file(reqfile, repo_dir)
+def process_output(output: Output, workdir: Path) -> None:
+    for pkg in output.packages:
+        for config_file in pkg.config_files:
+            path = pkg.path / config_file.relpath
+            log.info("modifying %s", path)
+            path.write_text(config_file.content)
 
-    print(f"PIP_INDEX_URL={index_url}")
+    env_file_content = "\n".join(
+        f"{shlex.quote(env_var.name)}={shlex.quote(env_var.value)}"
+        for env_var in output.env_vars
+    )
+    (workdir / "cachito.env").write_text(env_file_content)
 
 
 def main() -> None:
@@ -112,11 +116,10 @@ def main() -> None:
 
     workdir = cli_args["workdir"]
 
-    for pkg in cli_args["packages"]:
-        if isinstance(pkg, PipPkgSpec):
-            resolve_pip(pkg, workdir)
-        else:
-            raise NotImplementedError(pkg.type)
+    pip_pkgs = [pkg for pkg in cli_args["packages"] if isinstance(pkg, PipPkgSpec)]
+    output = pip.resolve_pip(pip_pkgs, workdir)
+
+    process_output(output, workdir)
 
 
 if __name__ == "__main__":

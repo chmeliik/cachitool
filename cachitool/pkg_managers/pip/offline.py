@@ -1,4 +1,5 @@
 import filecmp
+import io
 import logging
 from pathlib import Path
 
@@ -38,9 +39,9 @@ def sync_repo(pip_deps_dir: Path, repo_dir: Path) -> str:
     return f"file://{repo_dir.resolve() / 'simple'}/"
 
 
-def modify_req_file(req_file_path: Path, repo_dir: Path) -> None:
+def update_req_file(req_file_path: Path, repo_dir: Path) -> str | None:
     """
-    Modify pip requirement file.
+    Modify pip requirement file. Return content of updated file (if updates needed) or None.
 
     Generates and returns a configuration file representing a custom pip requirement file where the
     original URL and VCS entries are replaced with entries pointing to entries in the local index.
@@ -86,9 +87,11 @@ def modify_req_file(req_file_path: Path, repo_dir: Path) -> None:
 
     if not differs_from_original:
         # No vcs or url dependencies. No need for a custom requirements file
-        return
+        return None
 
     cachito_requirement_file = PipRequirementsFile.from_requirements_and_options(
         cachito_requirements, original_requirement_file.options
     )
-    cachito_requirement_file.write(req_file_path)
+    fileobj = io.StringIO()
+    cachito_requirement_file.write(fileobj)
+    return fileobj.getvalue()

@@ -779,8 +779,8 @@ class PipRequirementsFile:
         new_instance._parsed = {"requirements": list(requirements), "options": list(options)}
         return new_instance
 
-    def write(self, file_path=None):
-        """Write the options and requirements to a file.
+    def write_to_path(self, file_path=None):
+        """Write the options and requirements to a file at the specified path.
 
         :param str file_path: the file path to write the new file. If not provided, the file
             path used when initiating the class is used.
@@ -791,12 +791,16 @@ class PipRequirementsFile:
             raise RuntimeError("Unspecified 'file_path' for the requirements file")
 
         with open(file_path, "w") as f:
-            if self.options:
-                f.write(" ".join(self.options))
-                f.write("\n")
-            for requirement in self.requirements:
-                f.write(str(requirement))
-                f.write("\n")
+            self.write(f)
+
+    def write(self, file_obj):
+        """Write the options and requirements to a file."""
+        if self.options:
+            file_obj.write(" ".join(self.options))
+            file_obj.write("\n")
+        for requirement in self.requirements:
+            file_obj.write(str(requirement))
+            file_obj.write("\n")
 
     @property
     def requirements(self):
@@ -2087,6 +2091,7 @@ def resolve_pip(path, workdir: Path, requirement_files=None, build_requirement_f
             "version": _version(dep),
             "type": "pip",
             "dev": dep.get("dev", False),
+            "downloaded_path": dep["path"]
         }
         for dep in (requires + buildrequires)
     ]
