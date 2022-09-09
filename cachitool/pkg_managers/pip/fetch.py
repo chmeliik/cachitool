@@ -1722,6 +1722,10 @@ def _download_url_package(requirement, pip_deps_dir, trusted_hosts):
     hash_spec = hashes[0] if hashes else requirement.qualifiers["cachito_hash"]
 
     url = urllib.parse.urlparse(requirement.url)
+    if "cachito_hash" in requirement.qualifiers:
+        url_with_hash = requirement.url
+    else:
+        url_with_hash = _add_cachito_hash_to_url(url, hash_spec)
 
     raw_component_name = get_raw_component_name(requirement)
     filename = raw_component_name.rsplit("/", 1)[-1]
@@ -1763,11 +1767,6 @@ def _download_url_package(requirement, pip_deps_dir, trusted_hosts):
         insecure = False
 
     general.download_binary_file(requirement.url, download_path, insecure=insecure)
-
-    if "cachito_hash" in requirement.qualifiers:
-        url_with_hash = requirement.url
-    else:
-        url_with_hash = _add_cachito_hash_to_url(url, hash_spec)
 
     return info
 
