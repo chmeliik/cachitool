@@ -7,6 +7,7 @@ from typing import TypedDict, TypeVar
 
 from cachitool.models.input import PkgSpec, PipPkgSpec, make_package_spec
 from cachitool.models.output import ResolvedRequest
+from cachitool.paths import OutputDir
 from cachitool.pkg_managers import pip
 
 
@@ -29,8 +30,8 @@ def make_parser() -> argparse.ArgumentParser:
         default="[]",
     )
     parser.add_argument(
-        "--workdir",
-        help="working directory for the Cachito process",
+        "--output-dir",
+        help="directory for Cachito outputs",
         default=".",
     )
     return parser
@@ -38,7 +39,7 @@ def make_parser() -> argparse.ArgumentParser:
 
 class CLIArgs(TypedDict):
     packages: list[PkgSpec]
-    workdir: Path
+    output_dir: OutputDir
 
 
 T = TypeVar("T")
@@ -84,20 +85,26 @@ def convert_args(args: argparse.Namespace) -> CLIArgs:
 
     return {
         "packages": packages or packagelist,
-        "workdir": Path(args.workdir),
+        "output_dir": OutputDir(args.output_dir),
     }
 
 
-def process_output(output: ResolvedRequest, workdir: Path) -> None:
+def process_output(output: ResolvedRequest, output_dir: OutputDir) -> None:
+    configs_dir = output_dir.config_files.mkdirs()
+
     for pkg in output.packages:
         for config_file in pkg.config_files:
-            path = pkg.path / config_file.relpath
-            log.info("modifying %s", path)
-            path.write_text(config_file.content)
+            original_path = pkg.path / config_file.relpath
+            config_path = configs_dir.get_subpath(original_path)
+            config_path.parent.mkdirs()
 
-    env_file = workdir / "env.json"
-    log.info("writing environment variables to %s", env_file)
-    with env_file.open("w") as f:
+            log.info("writing to %s", config_path)
+            config_path.write_text(config_file.content)
+            log.info("also modifying %s", original_path)
+            original_path.write_text(config_file.content)
+
+    log.info("writing environment variables to %s", output_dir.env_file)
+    with output_dir.env_file.open("w") as f:
         json.dump([env_var.dict() for env_var in output.env_vars], f)
 
 
@@ -112,12 +119,12 @@ def main() -> None:
     if not cli_args["packages"]:
         parser.error("no packages to process")
 
-    workdir = cli_args["workdir"]
+    output_dir = cli_args["output_dir"]
 
     pip_pkgs = [pkg for pkg in cli_args["packages"] if isinstance(pkg, PipPkgSpec)]
-    output = pip.resolve_pip(pip_pkgs, workdir)
+    output = pip.resolve_pip(pip_pkgs, output_dir)
 
-    process_output(output, workdir)
+    process_output(output, output_dir)
 
 
 if __name__ == "__main__":

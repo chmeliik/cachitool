@@ -73,7 +73,7 @@ cachitool --packagelist pip,gomod
 
 # specify where to put the fetched dependencies and other miscellaneous things
 #   (local pip index, env vars, content manifest, config files...)
-cachitool --package pip:path/to/repo --workdir ./output  # TBD rename to output-dir
+cachitool --package pip:path/to/repo --output-dir ./output
 ```
 
 Note: while the examples imply two different repos, it can be two subpaths in the same

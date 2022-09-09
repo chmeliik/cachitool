@@ -18,4 +18,4 @@ venv/bin/cachitool \
         "path": "'"$repo_dir"'",
         "requirements_build_files": ["requirements-build.txt", "requirements-pip.txt"]
     }' \
-    --workdir atomic-reactor-test/workdir
+    --output-dir atomic-reactor-test/workdir

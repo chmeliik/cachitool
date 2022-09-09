@@ -17,4 +17,4 @@ sed --in-place 's/futures==3.1.1/futures==3.0.5/' "$repo_path"/requirements.txt
 
 venv/bin/cachitool \
     --package pip:"$repo_path" \
-    --workdir quay-test/workdir
+    --output-dir quay-test/workdir
