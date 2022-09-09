@@ -1,4 +1,6 @@
+import urllib.parse
 from pathlib import Path
+from typing import Literal
 
 import pydantic
 
@@ -13,6 +15,14 @@ class ResolvedDep(pydantic.BaseModel):
     name: str
     version: str
     downloaded_path: Path
+
+
+class PipResolvedDep(ResolvedDep):
+    type: Literal["pip"]
+
+    def is_external(self) -> bool:
+        parsed_url = urllib.parse.urlparse(self.version)
+        return bool(parsed_url.scheme)
 
 
 class ResolvedPackage(pydantic.BaseModel):
