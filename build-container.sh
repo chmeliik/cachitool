@@ -16,6 +16,12 @@ mapfile -t buildargs < <(
     done
 )
 
+find "$workdir/config-files" -type f | while read -r f; do
+    original_path=$(realpath "$f" --relative-base "$workdir/config-files")
+    echo "Copying config file to $original_path"
+    cp "$f" "$original_path"
+done
+
 imagename=cachi2-$(basename "$dockerfile_dir")
 piprepo_path=$(realpath "$workdir/piprepo")
 

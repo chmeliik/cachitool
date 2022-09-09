@@ -97,11 +97,8 @@ def process_output(output: ResolvedRequest, output_dir: OutputDir) -> None:
             original_path = pkg.path / config_file.relpath
             config_path = configs_dir.get_subpath(original_path)
             config_path.parent.mkdirs()
-
             log.info("writing to %s", config_path)
             config_path.write_text(config_file.content)
-            log.info("also modifying %s", original_path)
-            original_path.write_text(config_file.content)
 
     log.info("writing environment variables to %s", output_dir.env_file)
     with output_dir.env_file.open("w") as f:
