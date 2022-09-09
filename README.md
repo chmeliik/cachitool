@@ -15,6 +15,8 @@ cachitool --help
 
 ## Manual tests
 
+atomic-reactor
+
 ```shell
 # download deps for atomic-reactor
 ./runtest.sh
@@ -26,6 +28,15 @@ sudo ./block_pypi.sh
 ./build-container.sh atomic-reactor-test
 
 # unblock pypi.org traffic
+sudo ./unblock_pypi.sh
+```
+
+quay (this one only installs deps, atomic-reactor tests the installed app as well)
+
+```shell
+./runtest-quay.sh
+sudo ./block_pypi.sh
+./build-container.sh quay-test
 sudo ./unblock_pypi.sh
 ```
 
