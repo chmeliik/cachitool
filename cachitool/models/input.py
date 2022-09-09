@@ -4,15 +4,19 @@ from typing import Any, Literal
 import pydantic
 
 from cachitool import util
+from cachitool.models.unique import UniqueItem, make_unique
 
 
-class PkgSpec(pydantic.BaseModel, extra="forbid"):
+class PkgSpec(UniqueItem, extra="forbid"):
     type: str
     path: Path
 
     @pydantic.validator("path")
     def normalize_path(cls, v: str | Path) -> Path:
         return util.normpath(v)
+
+    def unique_by(self) -> tuple[str, Path]:
+        return self.type, self.path
 
 
 class GoPkgSpec(PkgSpec):

@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import TypedDict, TypeVar
 
 from cachitool.models.input import PkgSpec, PipPkgSpec, make_package_spec
-from cachitool.models.output import Output
+from cachitool.models.output import ResolvedRequest
 from cachitool.pkg_managers import pip
 
 
@@ -88,7 +88,7 @@ def convert_args(args: argparse.Namespace) -> CLIArgs:
     }
 
 
-def process_output(output: Output, workdir: Path) -> None:
+def process_output(output: ResolvedRequest, workdir: Path) -> None:
     for pkg in output.packages:
         for config_file in pkg.config_files:
             path = pkg.path / config_file.relpath
