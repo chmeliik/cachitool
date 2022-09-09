@@ -24,8 +24,7 @@ ARG PIP_INDEX_URL
 # can't build cryptography with rust
 RUN export CRYPTOGRAPHY_DONT_BUILD_RUST=1 \
     && python3.8 -m pip install -U pip \
-    && python3.8 -m pip install -r requirements-build.txt \
-    && python3.8 -m pip install -r requirements.txt --no-build-isolation \
+    && python3.8 -m pip install -r requirements.txt \
     && python3.8 setup.py install
 
 CMD ["python3.8", "-m", "atomic_reactor.cli.main", "--help"]
