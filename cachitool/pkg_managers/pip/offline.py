@@ -16,13 +16,11 @@ log = logging.getLogger(__name__)
 
 
 def sync_repo(pip_deps: Iterable[PipResolvedDep], repo_dir: Path) -> tuple[str, Path]:
-    """Move downloaded dependencies to repo_dir and build a local index.
+    """Symlink downloaded dependencies to repo_dir and build a local index.
 
-    External dependencies will be moved repo_dir/"external" and will not be
+    External dependencies will be symlinked to repo_dir/"external"/* and will not be
     part of the index. They need be replaced with file:// urls in requirements
     files.
-
-    Replace the downloaded deps with relative symlinks pointing to their new location.
 
     :return:
         file:// URL to local index (absolute path)
@@ -42,19 +40,15 @@ def sync_repo(pip_deps: Iterable[PipResolvedDep], repo_dir: Path) -> tuple[str, 
             repo_file = repo_dir / dep_file.name
 
         if not repo_file.exists():
-            dep_file.rename(repo_file)
-        elif filecmp.cmp(dep_file, repo_file):
-            dep_file.unlink()
-        else:
+            # note: relpath will usually contain ../ and will break if either of the two dirs moves
+            relpath = os.path.relpath(dep_file, start=repo_file.parent)
+            repo_file.symlink_to(relpath)
+        elif not filecmp.cmp(dep_file, repo_file):
             msg = (
                 f"{repo_file.name} already exists in the local index. "
                 f"{dep_file} has the same name but different content!"
             )
             raise CachitoError(msg)
-
-        # note: relpath will usually contain ../ and will break if either of the two dirs moves
-        relpath = os.path.relpath(repo_file, start=dep_file.parent)
-        dep_file.symlink_to(relpath)
 
     with piprepo.models.LocalIndex(source=str(repo_dir), destination=str(repo_dir)):
         log.info("Created local PyPI index at %s", repo_dir)

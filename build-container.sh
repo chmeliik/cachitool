@@ -2,7 +2,7 @@
 set -o errexit -o nounset -o pipefail
 
 dockerfile_dir=${1:-''}
-workdir=${2:-$dockerfile_dir/workdir}
+workdir=$(realpath "${2:-$dockerfile_dir/workdir}")
 
 if [[ -z "$dockerfile_dir" ]]; then
     echo "usage: $0 dockerfile_dir [workdir]" >&2
@@ -23,13 +23,12 @@ find "$workdir/config-files" -type f | while read -r f; do
 done
 
 imagename=cachi2-$(basename "$dockerfile_dir")
-piprepo_path=$(realpath "$workdir/piprepo")
 
 set -x
 
 podman build "$dockerfile_dir" \
     --tag "$imagename" \
-    --volume "$piprepo_path:$piprepo_path:ro,Z" \
+    --volume "$workdir:$workdir:ro,Z" \
     "${buildargs[@]}"
 
 podman run --rm -ti "$imagename"
