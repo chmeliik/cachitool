@@ -29,7 +29,7 @@ set -x
 
 podman build "$dockerfile_dir" \
     --tag "$imagename" \
-    --volume "$piprepo_path:$piprepo_path:z" \
+    --volume "$piprepo_path:$piprepo_path:ro,Z" \
     "${buildargs[@]}"
 
 podman run --rm -ti "$imagename"
