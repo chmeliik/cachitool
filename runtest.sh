@@ -4,7 +4,7 @@ set -o errexit -o nounset -o pipefail
 repo_dir=atomic-reactor-test/atomic-reactor
 rm -rf "$repo_dir"
 
-git clone --single-branch --depth 1 \
+git clone --single-branch --filter=blob:none \
     https://github.com/containerbuildsystem/atomic-reactor.git \
     "$repo_dir"
 

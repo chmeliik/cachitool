@@ -4,7 +4,7 @@ set -o errexit -o nounset -o pipefail
 repo_path=quay-test/quay
 rm -rf "$repo_path"
 
-git clone --single-branch --depth 1 \
+git clone --single-branch --filter=blob:none \
     https://github.com/quay/quay \
     "$repo_path"
 
