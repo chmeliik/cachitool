@@ -1502,10 +1502,6 @@ def _validate_provided_hashes(requirements, require_hashes):
                 raise ValidationError(msg)
 
 
-def _is_relative_url(url: str) -> bool:
-    return not urllib.parse.urlparse(url).netloc
-
-
 def _download_pypi_package(requirement, pip_deps_dir, pypi_url, pypi_auth=None):
     """
     Download the sdist (source distribution) of a PyPI package.
@@ -1565,9 +1561,8 @@ def _download_pypi_package(requirement, pip_deps_dir, pypi_url, pypi_auth=None):
         log.info(f"{download_path.name} already downloaded")
         return info
 
-    if _is_relative_url(sdist_url := sdist["url"]):
-        sdist_url = f"{package_url.rstrip('/')}/{sdist_url}"
-
+    # url may or may not be relative
+    sdist_url = urllib.parse.urljoin(package_url, sdist["url"])
     general.download_binary_file(sdist_url, download_path, auth=pypi_auth)
     return info
 
