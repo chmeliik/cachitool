@@ -37,6 +37,6 @@ class OutputDir(SafePath):
     gomod_deps = subpath("deps/gomod")
     pip_deps = subpath("deps/pip")
     pip_local_index = subpath("piprepo")
-    config_files = subpath("config-files")
+    configs_file = subpath("configs.json")
     env_file = subpath("env.json")
     content_manifest = subpath("content-manifest.json")

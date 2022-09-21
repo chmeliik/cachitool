@@ -12,8 +12,8 @@ class PkgSpec(UniqueItem, extra="forbid"):
     path: Path
 
     @pydantic.validator("path")
-    def normalize_path(cls, v: str | Path) -> Path:
-        return util.normpath(v)
+    def make_absolute(cls, path: Path) -> Path:
+        return path.resolve()
 
     def unique_by(self) -> tuple[str, Path]:
         return self.type, self.path

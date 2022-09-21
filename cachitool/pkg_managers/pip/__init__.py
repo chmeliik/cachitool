@@ -19,7 +19,7 @@ def resolve_pip(pkg_specs: list[PipPkgSpec], output_dir: OutputDir) -> ResolvedR
     for pkg_spec, info in zip(pkg_specs, resolved):
         resolved_pkg = ResolvedPackage(
             type="pip",
-            path=pkg_spec.path,
+            abspath=pkg_spec.path,
             dependencies=[
                 PipResolvedDep.parse_obj(dep) for dep in info["dependencies"]
             ],
@@ -32,7 +32,7 @@ def resolve_pip(pkg_specs: list[PipPkgSpec], output_dir: OutputDir) -> ResolvedR
     for pkg, info in zip(packages, resolved):
         reqfile_paths = [Path(p) for p in info["requirements"]]
         config_files = [
-            ConfigFile(content=content, relpath=reqfile_path.relative_to(pkg.path))
+            ConfigFile(content=content, relpath=reqfile_path.relative_to(pkg.abspath))
             for reqfile_path in reqfile_paths
             if (content := update_req_file(reqfile_path, external_dir)) is not None
         ]

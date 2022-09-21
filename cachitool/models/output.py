@@ -37,18 +37,18 @@ class PipResolvedDep(ResolvedDep):
 class ResolvedPackage(UniqueItem):
     """Output of resolving a single package."""
     type: str
-    path: Path
+    abspath: Path
     dependencies: list[ResolvedDep]
     config_files: list[ConfigFile] = []
 
     def __str__(self) -> str:
-        return f"type={self.type!r} path={self.path!r} dependencies=[...] config_files=[...]"
+        return f"type={self.type!r} abspath={self.abspath!r} dependencies=[...] config_files=[...]"
 
     # don't deduplicate packages, we should never resolve the same one twice
     dedupe = False
 
     def unique_by(self) -> tuple[str, Path]:
-        return self.type, self.path
+        return self.type, self.abspath
 
     @pydantic.validator("dependencies", "config_files")
     def must_be_unique(cls, v):
