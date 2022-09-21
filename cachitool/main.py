@@ -11,7 +11,7 @@ from cachitool.paths import OutputDir
 from cachitool.pkg_managers import pip
 
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(levelname)-10s] %(message)s")
 log = logging.getLogger(__name__)
 
 
@@ -157,7 +157,11 @@ def main() -> None:
     except ValueError as e:
         parser.error(str(e))
 
-    args.run_fn(cli_args)
+    try:
+        args.run_fn(cli_args)
+    except Exception as e:
+        log.error("%s: %s", type(e).__name__, e)
+        parser.exit(1, f"cachitool: error: {e}\n")
 
 
 def run_fetch_deps(cli_args: FetchDepsArgs) -> None:
@@ -190,11 +194,15 @@ def run_apply_configs(cli_args: ApplyConfigsArgs) -> None:
 
     for config_file in configs:
         abspath = Path(config_file["abspath"])
-        if not to_dirs or any(abspath.is_relative_to(dirpath) for dirpath in to_dirs):
-            log.info("writing %s", abspath)
-            abspath.write_text(config_file["content"])
-        else:
+        if to_dirs and not any(abspath.is_relative_to(dirpath) for dirpath in to_dirs):
             log.debug("not writing %s (path does not match)", abspath)
+            continue
+
+        log.info("writing %s", abspath)
+        try:
+            abspath.write_text(config_file["content"])
+        except FileNotFoundError:
+            raise ValueError(f"Couldn't write {abspath}! Did the parent directory move?")
 
 
 if __name__ == "__main__":
