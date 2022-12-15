@@ -36,7 +36,7 @@ def resolve_pip(pkg_specs: list[PipPkgSpec], output_dir: OutputDir) -> ResolvedR
             for reqfile_path in reqfile_paths
             if (content := update_req_file(reqfile_path, external_dir)) is not None
         ]
-        resolved_pkg.config_files = config_files
+        pkg.config_files = config_files
 
     return ResolvedRequest(
         packages=packages,
