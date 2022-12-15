@@ -12,7 +12,7 @@ pushd "$repo_dir"
 git checkout d59e7b941aebe33cf2855483eba96dbfb2208c93
 popd
 
-venv/bin/cachitool \
+venv/bin/cachitool fetch-deps \
     --package '{
         "type":"pip",
         "path": "'"$repo_dir"'",

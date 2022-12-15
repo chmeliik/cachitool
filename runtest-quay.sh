@@ -15,6 +15,6 @@ popd
 # futures==3.1.1 was yanked and the newer ones properly declare that they don't support python 3
 sed --in-place 's/futures==3.1.1/futures==3.0.5/' "$repo_path"/requirements.txt
 
-venv/bin/cachitool \
+venv/bin/cachitool fetch-deps \
     --package pip:"$repo_path" \
     --output-dir quay-test/workdir
