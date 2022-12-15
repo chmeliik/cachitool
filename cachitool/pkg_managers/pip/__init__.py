@@ -27,7 +27,7 @@ def resolve_pip(pkg_specs: list[PipPkgSpec], output_dir: OutputDir) -> ResolvedR
         packages.append(resolved_pkg)
 
     all_deps = chain.from_iterable(pkg.dependencies for pkg in packages)
-    local_index_url, external_dir = sync_repo(all_deps, output_dir.pip_local_index)
+    repo_dir, external_dir = sync_repo(all_deps, output_dir.pip_local_index)
 
     for pkg, info in zip(packages, resolved):
         reqfile_paths = [Path(p) for p in info["requirements"]]
@@ -41,6 +41,7 @@ def resolve_pip(pkg_specs: list[PipPkgSpec], output_dir: OutputDir) -> ResolvedR
     return ResolvedRequest(
         packages=packages,
         env_vars=[
-            EnvVar(name="PIP_INDEX_URL", value=local_index_url),
+            EnvVar(name="PIP_FIND_LINKS", value=str(repo_dir)),
+            EnvVar(name="PIP_NO_INDEX", value="true"),
         ]
     )

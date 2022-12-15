@@ -19,7 +19,8 @@ RUN dnf -y install python38 python38-pip python38-devel \
 COPY atomic-reactor/ /opt/atomic-reactor
 WORKDIR /opt/atomic-reactor
 
-ARG PIP_INDEX_URL
+ARG PIP_FIND_LINKS
+ARG PIP_NO_INDEX
 
 # can't build cryptography with rust
 RUN export CRYPTOGRAPHY_DONT_BUILD_RUST=1 \

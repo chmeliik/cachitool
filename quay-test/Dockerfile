@@ -19,7 +19,8 @@ RUN dnf -y install python39 python39-devel python39-pip \
 COPY quay/ /opt/quay
 WORKDIR /opt/quay
 
-ARG PIP_INDEX_URL
+ARG PIP_FIND_LINKS
+ARG PIP_NO_INDEX
 
 RUN python3.9 -m pip install --upgrade setuptools pip && \
     python3.9 -m pip install wheel && \

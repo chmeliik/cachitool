@@ -15,15 +15,15 @@ from cachitool.pkg_managers.pip.fetch import PipRequirementsFile, get_raw_compon
 log = logging.getLogger(__name__)
 
 
-def sync_repo(pip_deps: Iterable[PipResolvedDep], repo_dir: Path) -> tuple[str, Path]:
-    """Symlink downloaded dependencies to repo_dir and build a local index.
+def sync_repo(pip_deps: Iterable[PipResolvedDep], repo_dir: Path) -> tuple[Path, Path]:
+    """Symlink downloaded dependencies to repo_dir to be used as a package source via --find-links.
 
-    External dependencies will be symlinked to repo_dir/"external"/* and will not be
-    part of the index. They need be replaced with file:// urls in requirements
-    files.
+    External dependencies will be symlinked to repo_dir/"external"/* and will not be found using
+    --find-links (pip doesn't support find-links for those) . They need be replaced with file://
+    urls in requirements files.
 
     :return:
-        file:// URL to local index (absolute path)
+        absolute Path to repo_dir
         absolute Path to dir with external deps
     """
     repo_dir = repo_dir.resolve()
@@ -50,11 +50,7 @@ def sync_repo(pip_deps: Iterable[PipResolvedDep], repo_dir: Path) -> tuple[str, 
             )
             raise CachitoError(msg)
 
-    with piprepo.models.LocalIndex(source=str(repo_dir), destination=str(repo_dir)):
-        log.info("Created local PyPI index at %s", repo_dir)
-
-    index_url = f"file://{repo_dir / 'simple'}/"
-    return index_url, external_dir
+    return repo_dir, external_dir
 
 
 def update_req_file(req_file_path: Path, external_deps_dir: Path) -> str | None:
