@@ -24,5 +24,6 @@ ARG PIP_NO_INDEX
 
 RUN python3.9 -m pip install --upgrade setuptools pip && \
     python3.9 -m pip install wheel && \
-    python3.9 -m pip install -r requirements.txt && \
-    python3.9 -m pip freeze
+    python3.9 -m pip install -r requirements.txt
+
+CMD ["python3.9", "-m", "pip", "freeze"]
