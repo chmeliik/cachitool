@@ -48,32 +48,32 @@ or a single `--packagelist` arg. Both accept either a simple string spec
 
 ```shell
 # fetch dependencies for a pip package at ./path/to/repo
-cachitool --package pip:path/to/repo
+cachitool fetch-deps --package pip:path/to/repo
 
 # specify more complex configuration
-cachitool --package '{
+cachitool fetch-deps --package '{
     "type": "pip",
     "path": "path/to/repo",
     "requirements_build_files": ["requirements-build.txt", "requirements-pip.txt"]
 }'
 
 # fetch deps for a pip package and a gomod package
-cachitool --package gomod:/path/to/repo --package pip:path/to/other-repo
+cachitool fetch-deps --package gomod:/path/to/repo --package pip:path/to/other-repo
 
-cachitool --packagelist gomod:/path/to/repo,pip:path/to/other-repo
+cachitool fetch-deps --packagelist gomod:/path/to/repo,pip:path/to/other-repo
 
-cachitool --packagelist '[
+cachitool fetch-deps --packagelist '[
     {"type": "gomod", "path": "/path/to/repo"},
     {"type": "pip", "path": "/path/to/other-repo"}
 ]'
 
 # same as above but both are in the current directory
-cachitool --package pip --package gomod
-cachitool --packagelist pip,gomod
+cachitool fetch-deps --package pip --package gomod
+cachitool fetch-deps --packagelist pip,gomod
 
 # specify where to put the fetched dependencies and other miscellaneous things
 #   (local pip index, env vars, content manifest, config files...)
-cachitool --package pip:path/to/repo --output-dir ./output
+cachitool fetch-deps --package pip:path/to/repo --output-dir ./output
 ```
 
 Note: while the examples imply two different repos, it can be two subpaths in the same
